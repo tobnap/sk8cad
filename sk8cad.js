@@ -54,14 +54,14 @@ function getParameterDefinitions()
 	{ name: 'bore_spacing', type: 'float', initial: 0.5, step: 0.1, min: 0.02, max: 2, caption: 'Bore Spacing, in <span id="boreSpacingInches" class="inchDisplay" > </span>'},
 
 	{ name: 'make_mold_zipties', type: 'checkbox', checked: true, caption: 'Ziptie mold'},
-	{ name: 'nose_nose_male_ziptie', type: 'float', initial: 5, step: 0.05, min: 0, max: 5, caption: 'Male Nose to Nose Ziptie Height, in <span id="boreSpacingInches" class="inchDisplay" > </span>'},
-	{ name: 'anose_nose_male_ziptie', type: 'float', initial: 0.8, step: 0.05, min: 0, max: 5, caption: 'Male Adjacent Nose to Nose Ziptie Height, in <span id="boreSpacingInches" class="inchDisplay" > </span>'},
-	{ name: 'center_male_ziptie', type: 'float', initial: 1.25, step: 0.05, min: 0, max: 5, caption: 'Male Center Ziptie Height, in <span id="boreSpacingInches" class="inchDisplay" > </span>'},
-	{ name: 'atail_tail_male_ziptie', type: 'float', initial: 1.3, step: 0.05, min: 0, max: 5, caption: 'Male Adjacent Tail to Tail Ziptie Height, in <span id="boreSpacingInches" class="inchDisplay" > </span>'},
-	{ name: 'tail_tail_male_ziptie', type: 'float', initial: 5, step: 0.05, min: 0, max: 5, caption: 'Male Tail to Tail Ziptie Height, in <span id="boreSpacingInches" class="inchDisplay" > </span>'},
+	{ name: 'nose_nose_male_ziptie', type: 'float', initial: 0.75, step: 0.05, min: 0, max: 5, caption: 'Male Nose to Nose Ziptie Height, in <span id="boreSpacingInches" class="inchDisplay" > </span>'},
+	{ name: 'anose_nose_male_ziptie', type: 'float', initial: 3, step: 0.05, min: 0, max: 5, caption: 'Male Adjacent Nose to Nose Ziptie Height, in <span id="boreSpacingInches" class="inchDisplay" > </span>'},
+	{ name: 'center_male_ziptie', type: 'float', initial: 2.55, step: 0.05, min: 0, max: 5, caption: 'Male Center Ziptie Height, in <span id="boreSpacingInches" class="inchDisplay" > </span>'},
+	{ name: 'atail_tail_male_ziptie', type: 'float', initial: 3, step: 0.05, min: 0, max: 5, caption: 'Male Adjacent Tail to Tail Ziptie Height, in <span id="boreSpacingInches" class="inchDisplay" > </span>'},
+	{ name: 'tail_tail_male_ziptie', type: 'float', initial: 1, step: 0.05, min: 0, max: 5, caption: 'Male Tail to Tail Ziptie Height, in <span id="boreSpacingInches" class="inchDisplay" > </span>'},
 	{ name: 'nose_nose_female_ziptie', type: 'float', initial: 3, step: 0.05, min: 0, max: 5, caption: 'Female Nose to Nose Ziptie Height, in <span id="boreSpacingInches" class="inchDisplay" > </span>'},
 	{ name: 'anose_nose_female_ziptie', type: 'float', initial: 0.8, step: 0.05, min: 0, max: 5, caption: 'Female Adjacent Nose to Nose Ziptie Height, in <span id="boreSpacingInches" class="inchDisplay" > </span>'},
-	{ name: 'center_female_ziptie', type: 'float', initial: 0.4, step: 0.05, min: 0, max: 5, caption: 'Female Center Ziptie Height, in <span id="boreSpacingInches" class="inchDisplay" > </span>'},
+	{ name: 'center_female_ziptie', type: 'float', initial: 1.25, step: 0.05, min: 0, max: 5, caption: 'Female Center Ziptie Height, in <span id="boreSpacingInches" class="inchDisplay" > </span>'},
 	{ name: 'atail_tail_female_ziptie', type: 'float', initial: 0.8, step: 0.05, min: 0, max: 5, caption: 'Female Adjacent Tail to Tail Ziptie Height, in <span id="boreSpacingInches" class="inchDisplay" > </span>'},
 	{ name: 'tail_tail_female_ziptie', type: 'float', initial: 2.75, step: 0.05, min: 0, max: 5, caption: 'Female Tail to Tail Ziptie Height, in <span id="boreSpacingInches" class="inchDisplay" > </span>'},
 
@@ -975,10 +975,15 @@ function main (parameters)
 		var ziptie_height = 5/25.4;
 		var ziptie_width = 2/25.4;
 		var ziptie_offest = 5/25.4;
+
 		var outerDiameter = (ziptie_width+ziptie_offest)*2;
 		var innerDiameter = ziptie_offest*2;
+
 		var wall_width = 1/25.4;
-		var slice = 0.5/25.4;
+		var slice = 0.3/25.4;
+
+		var alignmentHoleDiameter = 7/25.4;
+		var alignmentHoleDistance = 100/25.4;
 
 		if (display == '1' || display == '2') {
 			var verticalPlane = CSG.Plane.fromPoints([0,0,0], [5, 0, 1], [-5, 0, 1]);
@@ -986,6 +991,170 @@ function main (parameters)
 			var ziptie_array = [];
 
 			if (display == '1') {
+				// nose to nose
+				ziptie_array.push(cylinder({r: outerDiameter/2, h: nose_nose_male_ziptie, center: true}).translate([(nose_length-tail_length)/2+(mold_length/2), 0, -mold_height+nose_nose_male_ziptie/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cylinder({r: innerDiameter/2, h: nose_nose_male_ziptie, center: true}).translate([(nose_length-tail_length)/2+(mold_length/2), 0, -mold_height+nose_nose_male_ziptie/2]));
+				
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, (nose_nose_male_ziptie-ziptie_height*2)/5], center: true}).translate([(nose_length-tail_length)/2+(mold_length/2)-wall_width/2, 0, -mold_height+((nose_nose_male_ziptie-ziptie_height*2)/5)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, (nose_nose_male_ziptie-ziptie_height*2)/5], center: true}).translate([(nose_length-tail_length)/2+(mold_length/2)-wall_width/2, 0, -mold_height+nose_nose_male_ziptie-((nose_nose_male_ziptie-ziptie_height*2)/5)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, ((nose_nose_male_ziptie-ziptie_height*2)/5)*3], center: true}).translate([(nose_length-tail_length)/2+(mold_length/2)-wall_width/2, 0, -mold_height+((nose_nose_male_ziptie-ziptie_height*2)/5+ziptie_height)+(((nose_nose_male_ziptie-ziptie_height*2)/5)*3)/2]));
+				
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [outerDiameter, wall_width, (nose_nose_male_ziptie-ziptie_height*2)/5], center: true}).translate([(nose_length-tail_length)/2+(mold_length/2), wall_width/2, -mold_height+((nose_nose_male_ziptie-ziptie_height*2)/5)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [outerDiameter, wall_width, (nose_nose_male_ziptie-ziptie_height*2)/5], center: true}).translate([(nose_length-tail_length)/2+(mold_length/2), wall_width/2, -mold_height+nose_nose_male_ziptie-((nose_nose_male_ziptie-ziptie_height*2)/5)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [outerDiameter, wall_width, ((nose_nose_male_ziptie-ziptie_height*2)/5)*3], center: true}).translate([(nose_length-tail_length)/2+(mold_length/2), wall_width/2, -mold_height+((nose_nose_male_ziptie-ziptie_height*2)/5+ziptie_height)+(((nose_nose_male_ziptie-ziptie_height*2)/5)*3)/2]));	
+				
+				ziptie_array.push(cylinder({r: outerDiameter/2, h: ziptie_height, center: true}).rotateY(90).translate([(nose_length-tail_length)/2+(mold_length/2)-outerDiameter/2-ziptie_height/2-outerDiameter, 0, -mold_height]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cylinder({r: innerDiameter/2, h: ziptie_height-slice, center: true}).rotateY(90).translate([(nose_length-tail_length)/2+(mold_length/2)-outerDiameter/2-ziptie_height/2-outerDiameter, 0, -mold_height]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [ziptie_height, wall_width, innerDiameter/2], center: true}).translate([(nose_length-tail_length)/2+(mold_length/2)-outerDiameter/2-ziptie_height/2-outerDiameter, wall_width/2, -mold_height+innerDiameter/4]));
+
+								
+				// anose to nose
+				ziptie_array.push(cylinder({r: outerDiameter/2, h: anose_nose_male_ziptie, center: true}).translate([2*printLength+(nose_length-tail_length)/2-(printLength/2), mold_width/2, -mold_height+anose_nose_male_ziptie/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cylinder({r: innerDiameter/2, h: anose_nose_male_ziptie, center: true}).translate([2*printLength+(nose_length-tail_length)/2-(printLength/2), mold_width/2, -mold_height+anose_nose_male_ziptie/2]));
+				
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [outerDiameter, wall_width, (anose_nose_male_ziptie-ziptie_height*2)/5], center: true}).translate([2*printLength+(nose_length-tail_length)/2-(printLength/2), (mold_width-wall_width)/2, -mold_height+((anose_nose_male_ziptie-ziptie_height*2)/5)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [outerDiameter, wall_width, (anose_nose_male_ziptie-ziptie_height*2)/5], center: true}).translate([2*printLength+(nose_length-tail_length)/2-(printLength/2), (mold_width-wall_width)/2, -mold_height+anose_nose_male_ziptie-((anose_nose_male_ziptie-ziptie_height*2)/5)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [outerDiameter, wall_width, ((anose_nose_male_ziptie-ziptie_height*2)/5)*3], center: true}).translate([2*printLength+(nose_length-tail_length)/2-(printLength/2), (mold_width-wall_width)/2, -mold_height+((anose_nose_male_ziptie-ziptie_height*2)/5+ziptie_height)+(((anose_nose_male_ziptie-ziptie_height*2)/5)*3)/2]));
+				
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, (anose_nose_male_ziptie-ziptie_height*2)/5], center: true}).translate([2*printLength+(nose_length-tail_length)/2-(printLength/2)-wall_width/2, mold_width/2, -mold_height+((anose_nose_male_ziptie-ziptie_height*2)/5)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, (anose_nose_male_ziptie-ziptie_height*2)/5], center: true}).translate([2*printLength+(nose_length-tail_length)/2-(printLength/2)-wall_width/2, mold_width/2, -mold_height+anose_nose_male_ziptie-((anose_nose_male_ziptie-ziptie_height*2)/5)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, ((anose_nose_male_ziptie-ziptie_height*2)/5)*3], center: true}).translate([2*printLength+(nose_length-tail_length)/2-(printLength/2)-wall_width/2, mold_width/2, -mold_height+((anose_nose_male_ziptie-ziptie_height*2)/5+ziptie_height)+(((anose_nose_male_ziptie-ziptie_height*2)/5)*3)/2]));
+				
+				// nose
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, (anose_nose_male_ziptie-ziptie_height*2)/5], center: true}).translate([2*printLength+(nose_length-tail_length)/2-(printLength/2)+wall_width/2, mold_width/2, -mold_height+((anose_nose_male_ziptie-ziptie_height*2)/5)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, (anose_nose_male_ziptie-ziptie_height*2)/5], center: true}).translate([2*printLength+(nose_length-tail_length)/2-(printLength/2)+wall_width/2, mold_width/2, -mold_height+anose_nose_male_ziptie-((anose_nose_male_ziptie-ziptie_height*2)/5)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, ((anose_nose_male_ziptie-ziptie_height*2)/5)*3], center: true}).translate([2*printLength+(nose_length-tail_length)/2-(printLength/2)+wall_width/2, mold_width/2, -mold_height+((anose_nose_male_ziptie-ziptie_height*2)/5+ziptie_height)+(((anose_nose_male_ziptie-ziptie_height*2)/5)*3)/2]));
+
+				ziptie_array.push(cylinder({r: outerDiameter/2, h: ziptie_height, center: true}).rotateY(90).translate([2*printLength+(nose_length-tail_length)/2-(printLength/2)-ziptie_height/2-outerDiameter, 0, -mold_height]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cylinder({r: innerDiameter/2, h: ziptie_height-slice, center: true}).rotateY(90).translate([2*printLength+(nose_length-tail_length)/2-(printLength/2)-ziptie_height/2-outerDiameter, 0, -mold_height]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [ziptie_height, wall_width, innerDiameter/2], center: true}).translate([2*printLength+(nose_length-tail_length)/2-(printLength/2)-ziptie_height/2-outerDiameter, wall_width/2, -mold_height+innerDiameter/4]));
+				
+				ziptie_array.push(cylinder({r: outerDiameter/2, h: ziptie_height, center: true}).rotateY(90).translate([2*printLength+(nose_length-tail_length)/2-(printLength/2)+ziptie_height/2+outerDiameter, 0, -mold_height]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cylinder({r: innerDiameter/2, h: ziptie_height-slice, center: true}).rotateY(90).translate([2*printLength+(nose_length-tail_length)/2-(printLength/2)+ziptie_height/2+outerDiameter, 0, -mold_height]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [ziptie_height, wall_width, innerDiameter/2], center: true}).translate([2*printLength+(nose_length-tail_length)/2-(printLength/2)+ziptie_height/2+outerDiameter, wall_width/2, -mold_height+innerDiameter/4]));
+				
+				ziptie_array.push(cylinder({r: outerDiameter/2, h: ziptie_height, center: true}).rotateX(90).translate([2*printLength+(nose_length-tail_length)/2-(printLength/2), ziptie_height/2+outerDiameter, -mold_height]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cylinder({r: innerDiameter/2, h: ziptie_height-slice, center: true}).rotateX(90).translate([2*printLength+(nose_length-tail_length)/2-(printLength/2), ziptie_height/2+outerDiameter, -mold_height]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width*2, ziptie_height, innerDiameter/2], center: true}).translate([2*printLength+(nose_length-tail_length)/2-(printLength/2), ziptie_height/2+outerDiameter, -mold_height+innerDiameter/4]));
+				
+
+				// center
+				ziptie_array.push(cylinder({r: outerDiameter/2, h: center_male_ziptie, center: true}).translate([(nose_length-tail_length)/2+(printLength/2), mold_width/2, -mold_height+center_male_ziptie/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cylinder({r: innerDiameter/2, h: center_male_ziptie, center: true}).translate([(nose_length-tail_length)/2+(printLength/2), mold_width/2, -mold_height+center_male_ziptie/2]));
+				
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [outerDiameter, wall_width, (center_male_ziptie-ziptie_height*2)/5], center: true}).translate([printLength+(nose_length-tail_length)/2-(printLength/2), (mold_width-wall_width)/2, -mold_height+((center_male_ziptie-ziptie_height*2)/5)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [outerDiameter, wall_width, (center_male_ziptie-ziptie_height*2)/5], center: true}).translate([printLength+(nose_length-tail_length)/2-(printLength/2), (mold_width-wall_width)/2, -mold_height+center_male_ziptie-((center_male_ziptie-ziptie_height*2)/5)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [outerDiameter, wall_width, ((center_male_ziptie-ziptie_height*2)/5)*3], center: true}).translate([printLength+(nose_length-tail_length)/2-(printLength/2), (mold_width-wall_width)/2, -mold_height+((center_male_ziptie-ziptie_height*2)/5+ziptie_height)+(((center_male_ziptie-ziptie_height*2)/5)*3)/2]));
+								
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, (center_male_ziptie-ziptie_height*2)/5], center: true}).translate([printLength+(nose_length-tail_length)/2-(printLength/2)-wall_width/2, mold_width/2, -mold_height+((center_male_ziptie-ziptie_height*2)/5)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, (center_male_ziptie-ziptie_height*2)/5], center: true}).translate([printLength+(nose_length-tail_length)/2-(printLength/2)-wall_width/2, mold_width/2, -mold_height+center_male_ziptie-((center_male_ziptie-ziptie_height*2)/5)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, ((center_male_ziptie-ziptie_height*2)/5)*3], center: true}).translate([printLength+(nose_length-tail_length)/2-(printLength/2)-wall_width/2, mold_width/2, -mold_height+((center_male_ziptie-ziptie_height*2)/5+ziptie_height)+(((center_male_ziptie-ziptie_height*2)/5)*3)/2]));
+								
+				// anose
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, (center_male_ziptie-ziptie_height*2)/5], center: true}).translate([printLength+(nose_length-tail_length)/2-(printLength/2)+wall_width/2, mold_width/2, -mold_height+((center_male_ziptie-ziptie_height*2)/5)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, (center_male_ziptie-ziptie_height*2)/5], center: true}).translate([printLength+(nose_length-tail_length)/2-(printLength/2)+wall_width/2, mold_width/2, -mold_height+center_male_ziptie-((center_male_ziptie-ziptie_height*2)/5)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, ((center_male_ziptie-ziptie_height*2)/5)*3], center: true}).translate([printLength+(nose_length-tail_length)/2-(printLength/2)+wall_width/2, mold_width/2, -mold_height+((center_male_ziptie-ziptie_height*2)/5+ziptie_height)+(((center_male_ziptie-ziptie_height*2)/5)*3)/2]));
+				
+				ziptie_array.push(cylinder({r: outerDiameter/2, h: center_male_ziptie, center: true}).translate([(nose_length-tail_length)/2-(printLength-(printLength/2)), mold_width/2, -mold_height+center_male_ziptie/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cylinder({r: innerDiameter/2, h: center_male_ziptie, center: true}).translate([(nose_length-tail_length)/2-(printLength-(printLength/2)), mold_width/2, -mold_height+center_male_ziptie/2]));
+				
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [outerDiameter, wall_width, (center_male_ziptie-ziptie_height*2)/5], center: true}).translate([(nose_length-tail_length)/2-(printLength/2), (mold_width-wall_width)/2, -mold_height+((center_male_ziptie-ziptie_height*2)/5)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [outerDiameter, wall_width, (center_male_ziptie-ziptie_height*2)/5], center: true}).translate([(nose_length-tail_length)/2-(printLength/2), (mold_width-wall_width)/2, -mold_height+center_male_ziptie-((center_male_ziptie-ziptie_height*2)/5)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [outerDiameter, wall_width, ((center_male_ziptie-ziptie_height*2)/5)*3], center: true}).translate([(nose_length-tail_length)/2-(printLength/2), (mold_width-wall_width)/2, -mold_height+((center_male_ziptie-ziptie_height*2)/5+ziptie_height)+(((center_male_ziptie-ziptie_height*2)/5)*3)/2]));
+				
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, (center_male_ziptie-ziptie_height*2)/5], center: true}).translate([(nose_length-tail_length)/2-(printLength/2)+wall_width/2, mold_width/2, -mold_height+((center_male_ziptie-ziptie_height*2)/5)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, (center_male_ziptie-ziptie_height*2)/5], center: true}).translate([(nose_length-tail_length)/2-(printLength/2)+wall_width/2, mold_width/2, -mold_height+center_male_ziptie-((center_male_ziptie-ziptie_height*2)/5)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, ((center_male_ziptie-ziptie_height*2)/5)*3], center: true}).translate([(nose_length-tail_length)/2-(printLength/2)+wall_width/2, mold_width/2, -mold_height+((center_male_ziptie-ziptie_height*2)/5+ziptie_height)+(((center_male_ziptie-ziptie_height*2)/5)*3)/2]));
+				
+				// atail
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, (center_male_ziptie-ziptie_height*2)/5], center: true}).translate([(nose_length-tail_length)/2-(printLength/2)-wall_width/2, mold_width/2, -mold_height+((center_male_ziptie-ziptie_height*2)/5)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, (center_male_ziptie-ziptie_height*2)/5], center: true}).translate([(nose_length-tail_length)/2-(printLength/2)-wall_width/2, mold_width/2, -mold_height+center_male_ziptie-((center_male_ziptie-ziptie_height*2)/5)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, ((center_male_ziptie-ziptie_height*2)/5)*3], center: true}).translate([(nose_length-tail_length)/2-(printLength/2)-wall_width/2, mold_width/2, -mold_height+((center_male_ziptie-ziptie_height*2)/5+ziptie_height)+(((center_male_ziptie-ziptie_height*2)/5)*3)/2]));
+				
+				ziptie_array.push(cylinder({r: outerDiameter/2, h: ziptie_height, center: true}).rotateY(90).translate([printLength+(nose_length-tail_length)/2-(printLength/2)-ziptie_height/2-outerDiameter, 0, -mold_height]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cylinder({r: innerDiameter/2, h: ziptie_height-slice, center: true}).rotateY(90).translate([printLength+(nose_length-tail_length)/2-(printLength/2)-ziptie_height/2-outerDiameter, 0, -mold_height]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [ziptie_height, wall_width, innerDiameter/2], center: true}).translate([printLength+(nose_length-tail_length)/2-(printLength/2)-ziptie_height/2-outerDiameter, wall_width/2, -mold_height+innerDiameter/4]));
+								
+				ziptie_array.push(cylinder({r: outerDiameter/2, h: ziptie_height, center: true}).rotateY(90).translate([(nose_length-tail_length)/2-(printLength/2)+ziptie_height/2+outerDiameter, 0, -mold_height]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cylinder({r: innerDiameter/2, h: ziptie_height-slice, center: true}).rotateY(90).translate([(nose_length-tail_length)/2-(printLength/2)+ziptie_height/2+outerDiameter, 0, -mold_height]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [ziptie_height, wall_width, innerDiameter/2], center: true}).translate([(nose_length-tail_length)/2-(printLength/2)+ziptie_height/2+outerDiameter, wall_width/2, -mold_height+innerDiameter/4]));
+				
+				ziptie_array.push(cylinder({r: outerDiameter/2, h: ziptie_height, center: true}).rotateY(90).translate([printLength+(nose_length-tail_length)/2-(printLength/2)+ziptie_height/2+outerDiameter, 0, -mold_height]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cylinder({r: innerDiameter/2, h: ziptie_height-slice, center: true}).rotateY(90).translate([printLength+(nose_length-tail_length)/2-(printLength/2)+ziptie_height/2+outerDiameter, 0, -mold_height]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [ziptie_height, wall_width, innerDiameter/2], center: true}).translate([printLength+(nose_length-tail_length)/2-(printLength/2)+ziptie_height/2+outerDiameter, wall_width/2, -mold_height+innerDiameter/4]));
+				
+				ziptie_array.push(cylinder({r: outerDiameter/2, h: ziptie_height, center: true}).rotateY(90).translate([(nose_length-tail_length)/2-(printLength/2)-ziptie_height/2-outerDiameter, 0, -mold_height]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cylinder({r: innerDiameter/2, h: ziptie_height-slice, center: true}).rotateY(90).translate([(nose_length-tail_length)/2-(printLength/2)-ziptie_height/2-outerDiameter, 0, -mold_height]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [ziptie_height, wall_width, innerDiameter/2], center: true}).translate([(nose_length-tail_length)/2-(printLength/2)-ziptie_height/2-outerDiameter, wall_width/2, -mold_height+innerDiameter/4]));
+				
+				ziptie_array.push(cylinder({r: outerDiameter/2, h: ziptie_height, center: true}).rotateX(90).translate([printLength+(nose_length-tail_length)/2-(printLength/2)+ziptie_width, ziptie_height/2+outerDiameter, -mold_height]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cylinder({r: innerDiameter/2, h: ziptie_height-slice, center: true}).rotateX(90).translate([printLength+(nose_length-tail_length)/2-(printLength/2)+ziptie_width, ziptie_height/2+outerDiameter, -mold_height]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width*2, ziptie_height, innerDiameter/2], center: true}).translate([printLength+(nose_length-tail_length)/2-(printLength/2), ziptie_height/2+outerDiameter, -mold_height+innerDiameter/4]));
+				
+				ziptie_array.push(cylinder({r: outerDiameter/2, h: ziptie_height, center: true}).rotateX(90).translate([(nose_length-tail_length)/2-(printLength/2)-ziptie_width, ziptie_height/2+outerDiameter, -mold_height]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cylinder({r: innerDiameter/2, h: ziptie_height-slice, center: true}).rotateX(90).translate([(nose_length-tail_length)/2-(printLength/2)-ziptie_width, ziptie_height/2+outerDiameter, -mold_height]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width*2, ziptie_height, innerDiameter/2], center: true}).translate([(nose_length-tail_length)/2-(printLength/2), ziptie_height/2+outerDiameter, -mold_height+innerDiameter/4]));
+
+
+				// atail to tail
+				ziptie_array.push(cylinder({r: outerDiameter/2, h: atail_tail_male_ziptie, center: true}).translate([(nose_length-tail_length)/2-(printLength+(printLength/2)), mold_width/2, -mold_height+atail_tail_male_ziptie/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cylinder({r: innerDiameter/2, h: atail_tail_male_ziptie, center: true}).translate([(nose_length-tail_length)/2-(printLength+(printLength/2)), mold_width/2, -mold_height+atail_tail_male_ziptie/2]));
+				
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [outerDiameter, wall_width, (atail_tail_male_ziptie-ziptie_height*2)/5], center: true}).translate([(nose_length-tail_length)/2-(printLength+(printLength/2)), (mold_width-wall_width)/2, -mold_height+((atail_tail_male_ziptie-ziptie_height*2)/5)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [outerDiameter, wall_width, (atail_tail_male_ziptie-ziptie_height*2)/5], center: true}).translate([(nose_length-tail_length)/2-(printLength+(printLength/2)), (mold_width-wall_width)/2, -mold_height+atail_tail_male_ziptie-((atail_tail_male_ziptie-ziptie_height*2)/5)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [outerDiameter, wall_width, ((atail_tail_male_ziptie-ziptie_height*2)/5)*3], center: true}).translate([(nose_length-tail_length)/2-(printLength+(printLength/2)), (mold_width-wall_width)/2, -mold_height+((atail_tail_male_ziptie-ziptie_height*2)/5+ziptie_height)+(((atail_tail_male_ziptie-ziptie_height*2)/5)*3)/2]));
+				
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, (atail_tail_male_ziptie-ziptie_height*2)/5], center: true}).translate([(nose_length-tail_length)/2-(printLength+(printLength/2))+wall_width/2, mold_width/2, -mold_height+((atail_tail_male_ziptie-ziptie_height*2)/5)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, (atail_tail_male_ziptie-ziptie_height*2)/5], center: true}).translate([(nose_length-tail_length)/2-(printLength+(printLength/2))+wall_width/2, mold_width/2, -mold_height+atail_tail_male_ziptie-((atail_tail_male_ziptie-ziptie_height*2)/5)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, ((atail_tail_male_ziptie-ziptie_height*2)/5)*3], center: true}).translate([(nose_length-tail_length)/2-(printLength+(printLength/2))+wall_width/2, mold_width/2, -mold_height+((atail_tail_male_ziptie-ziptie_height*2)/5+ziptie_height)+(((atail_tail_male_ziptie-ziptie_height*2)/5)*3)/2]));
+							
+				// tail
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, (atail_tail_male_ziptie-ziptie_height*2)/5], center: true}).translate([(nose_length-tail_length)/2-(printLength+(printLength/2))-wall_width/2, mold_width/2, -mold_height+((atail_tail_male_ziptie-ziptie_height*2)/5)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, (atail_tail_male_ziptie-ziptie_height*2)/5], center: true}).translate([(nose_length-tail_length)/2-(printLength+(printLength/2))-wall_width/2, mold_width/2, -mold_height+atail_tail_male_ziptie-((atail_tail_male_ziptie-ziptie_height*2)/5)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, ((atail_tail_male_ziptie-ziptie_height*2)/5)*3], center: true}).translate([(nose_length-tail_length)/2-(printLength+(printLength/2))-wall_width/2, mold_width/2, -mold_height+((atail_tail_male_ziptie-ziptie_height*2)/5+ziptie_height)+(((atail_tail_male_ziptie-ziptie_height*2)/5)*3)/2]));
+				
+				ziptie_array.push(cylinder({r: outerDiameter/2, h: ziptie_height, center: true}).rotateY(90).translate([(nose_length-tail_length)/2-(printLength+(printLength/2))+ziptie_height/2+outerDiameter, 0, -mold_height]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cylinder({r: innerDiameter/2, h: ziptie_height-slice, center: true}).rotateY(90).translate([(nose_length-tail_length)/2-(printLength+(printLength/2))+ziptie_height/2+outerDiameter, 0, -mold_height]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [ziptie_height, wall_width, innerDiameter/2], center: true}).translate([(nose_length-tail_length)/2-(printLength+(printLength/2))+ziptie_height/2+outerDiameter, wall_width/2, -mold_height+innerDiameter/4]));
+				
+				ziptie_array.push(cylinder({r: outerDiameter/2, h: ziptie_height, center: true}).rotateY(90).translate([(nose_length-tail_length)/2-(printLength+(printLength/2))-ziptie_height/2-outerDiameter, 0, -mold_height]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cylinder({r: innerDiameter/2, h: ziptie_height-slice, center: true}).rotateY(90).translate([(nose_length-tail_length)/2-(printLength+(printLength/2))-ziptie_height/2-outerDiameter, 0, -mold_height]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [ziptie_height, wall_width, innerDiameter/2], center: true}).translate([(nose_length-tail_length)/2-(printLength+(printLength/2))-ziptie_height/2-outerDiameter, wall_width/2, -mold_height+innerDiameter/4]));
+				
+				ziptie_array.push(cylinder({r: outerDiameter/2, h: ziptie_height, center: true}).rotateX(90).translate([(nose_length-tail_length)/2-(printLength+(printLength/2)), ziptie_height/2+outerDiameter, -mold_height]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cylinder({r: innerDiameter/2, h: ziptie_height-slice, center: true}).rotateX(90).translate([(nose_length-tail_length)/2-(printLength+(printLength/2)), ziptie_height/2+outerDiameter, -mold_height]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width*2, ziptie_height, innerDiameter/2], center: true}).translate([(nose_length-tail_length)/2-(printLength+(printLength/2)), ziptie_height/2+outerDiameter, -mold_height+innerDiameter/4]));
+				
+				
+				// tail to tail
+				ziptie_array.push(cylinder({r: outerDiameter/2, h: tail_tail_male_ziptie, center: true}).translate([(nose_length-tail_length)/2-(mold_length/2), 0, -mold_height+tail_tail_male_ziptie/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cylinder({r: innerDiameter/2, h: tail_tail_male_ziptie, center: true}).translate([(nose_length-tail_length)/2-(mold_length/2), 0, -mold_height+tail_tail_male_ziptie/2]));
+				
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, (tail_tail_male_ziptie-ziptie_height*2)/5], center: true}).translate([(nose_length-tail_length)/2-(mold_length/2)+wall_width/2, 0, -mold_height+((tail_tail_male_ziptie-ziptie_height*2)/5)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, (tail_tail_male_ziptie-ziptie_height*2)/5], center: true}).translate([(nose_length-tail_length)/2-(mold_length/2)+wall_width/2, 0, -mold_height+tail_tail_male_ziptie-((tail_tail_male_ziptie-ziptie_height*2)/5)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, ((tail_tail_male_ziptie-ziptie_height*2)/5)*3], center: true}).translate([(nose_length-tail_length)/2-(mold_length/2)+wall_width/2, 0, -mold_height+((tail_tail_male_ziptie-ziptie_height*2)/5+ziptie_height)+(((tail_tail_male_ziptie-ziptie_height*2)/5)*3)/2]));
+				
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [outerDiameter, wall_width, (tail_tail_male_ziptie-ziptie_height*2)/5], center: true}).translate([(nose_length-tail_length)/2-(mold_length/2), wall_width/2, -mold_height+((tail_tail_male_ziptie-ziptie_height*2)/5)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [outerDiameter, wall_width, (tail_tail_male_ziptie-ziptie_height*2)/5], center: true}).translate([(nose_length-tail_length)/2-(mold_length/2), wall_width/2, -mold_height+tail_tail_male_ziptie-((tail_tail_male_ziptie-ziptie_height*2)/5)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [outerDiameter, wall_width, ((tail_tail_male_ziptie-ziptie_height*2)/5)*3], center: true}).translate([(nose_length-tail_length)/2-(mold_length/2), wall_width/2, -mold_height+((tail_tail_male_ziptie-ziptie_height*2)/5+ziptie_height)+(((tail_tail_male_ziptie-ziptie_height*2)/5)*3)/2]));	
+				
+				ziptie_array.push(cylinder({r: outerDiameter/2, h: ziptie_height, center: true}).rotateY(90).translate([(nose_length-tail_length)/2-(mold_length/2)+outerDiameter/2+ziptie_height/2+outerDiameter, 0, -mold_height]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cylinder({r: innerDiameter/2, h: ziptie_height-slice, center: true}).rotateY(90).translate([(nose_length-tail_length)/2-(mold_length/2)+outerDiameter/2+ziptie_height/2+outerDiameter, 0, -mold_height]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [ziptie_height, wall_width, innerDiameter/2], center: true}).translate([(nose_length-tail_length)/2-(mold_length/2)+outerDiameter/2+ziptie_height/2+outerDiameter, wall_width/2, -mold_height+innerDiameter/4]));
+			
+
+
+
+
+
+
+
+
+
+
+
+
+				/*
 				// nose to nose
 				//ziptie_array.push(cylinder({r: innerDiameter/2, h: nose_nose_male_ziptie, center: true}).translate([printLength+(nose_length-tail_length)/2-(printLength/2), mold_width/2, -mold_height+(nose_nose_male_ziptie/2)]));
 
@@ -1001,9 +1170,10 @@ function main (parameters)
 				ziptie_array.push(cylinder({r: outerDiameter/2, h: center_male_ziptie, center: true}).translate([(nose_length-tail_length)/2-(printLength-(printLength/2)), mold_width/2, -mold_height+(center_male_ziptie/2)]));
 				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cylinder({r: innerDiameter/2, h: center_male_ziptie, center: true}).translate([(nose_length-tail_length)/2-(printLength-(printLength/2)), mold_width/2, -mold_height+(center_male_ziptie/2)]));
 				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [outerDiameter, wall_width, ziptie_height], center: true}).translate([(nose_length-tail_length)/2-(printLength/2), (mold_width-wall_width)/2, -mold_height+(ziptie_height/2)]));
+				*/
 			} else {
 				// nose to nose
-				ziptie_array.push(cylinder({r: outerDiameter/2, h: nose_nose_female_ziptie, center: true}).translate([(nose_length-tail_length)/2+(mold_length/2), 0, (nose_nose_female_ziptie/2+skateboard.getBounds()[1].z-nose_nose_female_ziptie)]));
+				ziptie_array.push(cylinder({r: outerDiameter/2, h: nose_nose_female_ziptie, center: true}).translate([(nose_length-tail_length)/2+(mold_length/2), 0, nose_nose_female_ziptie/2+skateboard.getBounds()[1].z-nose_nose_female_ziptie]));
 				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cylinder({r: innerDiameter/2, h: nose_nose_female_ziptie, center: true}).translate([(nose_length-tail_length)/2+(mold_length/2), 0, nose_nose_female_ziptie/2+skateboard.getBounds()[1].z-nose_nose_female_ziptie]));
 				
 				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, (nose_nose_female_ziptie-ziptie_height*2)/5], center: true}).translate([(nose_length-tail_length)/2+(mold_length/2)-wall_width/2, 0, skateboard.getBounds()[1].z-((nose_nose_female_ziptie-ziptie_height*2)/5)/2]));
@@ -1020,7 +1190,7 @@ function main (parameters)
 
 				
 				// anose to nose
-				ziptie_array.push(cylinder({r: outerDiameter/2, h: anose_nose_female_ziptie, center: true}).translate([2*printLength+(nose_length-tail_length)/2-(printLength/2), mold_width/2, (anose_nose_female_ziptie/2+skateboard.getBounds()[1].z-anose_nose_female_ziptie)]));
+				ziptie_array.push(cylinder({r: outerDiameter/2, h: anose_nose_female_ziptie, center: true}).translate([2*printLength+(nose_length-tail_length)/2-(printLength/2), mold_width/2, anose_nose_female_ziptie/2+skateboard.getBounds()[1].z-anose_nose_female_ziptie]));
 				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cylinder({r: innerDiameter/2, h: anose_nose_female_ziptie, center: true}).translate([2*printLength+(nose_length-tail_length)/2-(printLength/2), mold_width/2, anose_nose_female_ziptie/2+skateboard.getBounds()[1].z-anose_nose_female_ziptie]));
 				
 				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [outerDiameter, wall_width, (anose_nose_female_ziptie-ziptie_height*2)/5], center: true}).translate([2*printLength+(nose_length-tail_length)/2-(printLength/2), (mold_width-wall_width)/2, skateboard.getBounds()[1].z-((anose_nose_female_ziptie-ziptie_height*2)/5)/2]));
@@ -1046,46 +1216,46 @@ function main (parameters)
 				
 				ziptie_array.push(cylinder({r: outerDiameter/2, h: ziptie_height, center: true}).rotateX(90).translate([2*printLength+(nose_length-tail_length)/2-(printLength/2), ziptie_height/2+outerDiameter, skateboard.getBounds()[1].z]));
 				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cylinder({r: innerDiameter/2, h: ziptie_height-slice, center: true}).rotateX(90).translate([2*printLength+(nose_length-tail_length)/2-(printLength/2), ziptie_height/2+outerDiameter, skateboard.getBounds()[1].z]));
-				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width*2, ziptie_height, innerDiameter/2], center: true}).translate([2*printLength+(nose_length-tail_length)/2-(printLength/2)-wall_width/4, ziptie_height/2+outerDiameter, skateboard.getBounds()[1].z-innerDiameter/4]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width*2, ziptie_height, innerDiameter/2], center: true}).translate([2*printLength+(nose_length-tail_length)/2-(printLength/2), ziptie_height/2+outerDiameter, skateboard.getBounds()[1].z-innerDiameter/4]));
 				
 
 				// center
-				ziptie_array.push(cylinder({r: outerDiameter/2, h: center_male_ziptie, center: true}).translate([(nose_length-tail_length)/2+(printLength/2), mold_width/2, (center_male_ziptie/2+skateboard.getBounds()[1].z-center_male_ziptie)]));
-				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cylinder({r: innerDiameter/2, h: center_male_ziptie, center: true}).translate([(nose_length-tail_length)/2+(printLength/2), mold_width/2, center_male_ziptie/2+skateboard.getBounds()[1].z-center_male_ziptie]));
+				ziptie_array.push(cylinder({r: outerDiameter/2, h: center_female_ziptie, center: true}).translate([(nose_length-tail_length)/2+(printLength/2), mold_width/2, center_female_ziptie/2+skateboard.getBounds()[1].z-center_female_ziptie]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cylinder({r: innerDiameter/2, h: center_female_ziptie, center: true}).translate([(nose_length-tail_length)/2+(printLength/2), mold_width/2, center_female_ziptie/2+skateboard.getBounds()[1].z-center_female_ziptie]));
 				
-				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [outerDiameter, wall_width, (center_male_ziptie-ziptie_height*2)/5], center: true}).translate([printLength+(nose_length-tail_length)/2-(printLength/2), (mold_width-wall_width)/2, skateboard.getBounds()[1].z-((center_male_ziptie-ziptie_height*2)/5)/2]));
-				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [outerDiameter, wall_width, (center_male_ziptie-ziptie_height*2)/5], center: true}).translate([printLength+(nose_length-tail_length)/2-(printLength/2), (mold_width-wall_width)/2, skateboard.getBounds()[1].z-center_male_ziptie+((center_male_ziptie-ziptie_height*2)/5)/2]));
-				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [outerDiameter, wall_width, ((center_male_ziptie-ziptie_height*2)/5)*3], center: true}).translate([printLength+(nose_length-tail_length)/2-(printLength/2), (mold_width-wall_width)/2, skateboard.getBounds()[1].z-((center_male_ziptie-ziptie_height*2)/5+ziptie_height)-(((center_male_ziptie-ziptie_height*2)/5)*3)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [outerDiameter, wall_width, (center_female_ziptie-ziptie_height*2)/5], center: true}).translate([printLength+(nose_length-tail_length)/2-(printLength/2), (mold_width-wall_width)/2, skateboard.getBounds()[1].z-((center_female_ziptie-ziptie_height*2)/5)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [outerDiameter, wall_width, (center_female_ziptie-ziptie_height*2)/5], center: true}).translate([printLength+(nose_length-tail_length)/2-(printLength/2), (mold_width-wall_width)/2, skateboard.getBounds()[1].z-center_female_ziptie+((center_female_ziptie-ziptie_height*2)/5)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [outerDiameter, wall_width, ((center_female_ziptie-ziptie_height*2)/5)*3], center: true}).translate([printLength+(nose_length-tail_length)/2-(printLength/2), (mold_width-wall_width)/2, skateboard.getBounds()[1].z-((center_female_ziptie-ziptie_height*2)/5+ziptie_height)-(((center_female_ziptie-ziptie_height*2)/5)*3)/2]));
 								
-				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, (center_male_ziptie-ziptie_height*2)/5], center: true}).translate([printLength+(nose_length-tail_length)/2-(printLength/2)-wall_width/2, mold_width/2, skateboard.getBounds()[1].z-((center_male_ziptie-ziptie_height*2)/5)/2]));
-				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, (center_male_ziptie-ziptie_height*2)/5], center: true}).translate([printLength+(nose_length-tail_length)/2-(printLength/2)-wall_width/2, mold_width/2, skateboard.getBounds()[1].z-center_male_ziptie+((center_male_ziptie-ziptie_height*2)/5)/2]));
-				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, ((center_male_ziptie-ziptie_height*2)/5)*3], center: true}).translate([printLength+(nose_length-tail_length)/2-(printLength/2)-wall_width/2, mold_width/2, skateboard.getBounds()[1].z-((center_male_ziptie-ziptie_height*2)/5+ziptie_height)-(((center_male_ziptie-ziptie_height*2)/5)*3)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, (center_female_ziptie-ziptie_height*2)/5], center: true}).translate([printLength+(nose_length-tail_length)/2-(printLength/2)-wall_width/2, mold_width/2, skateboard.getBounds()[1].z-((center_female_ziptie-ziptie_height*2)/5)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, (center_female_ziptie-ziptie_height*2)/5], center: true}).translate([printLength+(nose_length-tail_length)/2-(printLength/2)-wall_width/2, mold_width/2, skateboard.getBounds()[1].z-center_female_ziptie+((center_female_ziptie-ziptie_height*2)/5)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, ((center_female_ziptie-ziptie_height*2)/5)*3], center: true}).translate([printLength+(nose_length-tail_length)/2-(printLength/2)-wall_width/2, mold_width/2, skateboard.getBounds()[1].z-((center_female_ziptie-ziptie_height*2)/5+ziptie_height)-(((center_female_ziptie-ziptie_height*2)/5)*3)/2]));
 								
 				// anose
-				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, (center_male_ziptie-ziptie_height*2)/5], center: true}).translate([printLength+(nose_length-tail_length)/2-(printLength/2)+wall_width/2, mold_width/2, skateboard.getBounds()[1].z-((center_male_ziptie-ziptie_height*2)/5)/2]));
-				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, (center_male_ziptie-ziptie_height*2)/5], center: true}).translate([printLength+(nose_length-tail_length)/2-(printLength/2)+wall_width/2, mold_width/2, skateboard.getBounds()[1].z-center_male_ziptie+((center_male_ziptie-ziptie_height*2)/5)/2]));
-				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, ((center_male_ziptie-ziptie_height*2)/5)*3], center: true}).translate([printLength+(nose_length-tail_length)/2-(printLength/2)+wall_width/2, mold_width/2, skateboard.getBounds()[1].z-((center_male_ziptie-ziptie_height*2)/5+ziptie_height)-(((center_male_ziptie-ziptie_height*2)/5)*3)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, (center_female_ziptie-ziptie_height*2)/5], center: true}).translate([printLength+(nose_length-tail_length)/2-(printLength/2)+wall_width/2, mold_width/2, skateboard.getBounds()[1].z-((center_female_ziptie-ziptie_height*2)/5)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, (center_female_ziptie-ziptie_height*2)/5], center: true}).translate([printLength+(nose_length-tail_length)/2-(printLength/2)+wall_width/2, mold_width/2, skateboard.getBounds()[1].z-center_female_ziptie+((center_female_ziptie-ziptie_height*2)/5)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, ((center_female_ziptie-ziptie_height*2)/5)*3], center: true}).translate([printLength+(nose_length-tail_length)/2-(printLength/2)+wall_width/2, mold_width/2, skateboard.getBounds()[1].z-((center_female_ziptie-ziptie_height*2)/5+ziptie_height)-(((center_female_ziptie-ziptie_height*2)/5)*3)/2]));
 				
-				ziptie_array.push(cylinder({r: outerDiameter/2, h: center_male_ziptie, center: true}).translate([(nose_length-tail_length)/2-(printLength-(printLength/2)), mold_width/2, (center_male_ziptie/2+skateboard.getBounds()[1].z-center_male_ziptie)]));
-				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cylinder({r: innerDiameter/2, h: center_male_ziptie, center: true}).translate([(nose_length-tail_length)/2-(printLength-(printLength/2)), mold_width/2, (center_male_ziptie/2+skateboard.getBounds()[1].z-center_male_ziptie)]));
+				ziptie_array.push(cylinder({r: outerDiameter/2, h: center_female_ziptie, center: true}).translate([(nose_length-tail_length)/2-(printLength-(printLength/2)), mold_width/2, center_female_ziptie/2+skateboard.getBounds()[1].z-center_female_ziptie]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cylinder({r: innerDiameter/2, h: center_female_ziptie, center: true}).translate([(nose_length-tail_length)/2-(printLength-(printLength/2)), mold_width/2, center_female_ziptie/2+skateboard.getBounds()[1].z-center_female_ziptie]));
 				
-				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [outerDiameter, wall_width, (center_male_ziptie-ziptie_height*2)/5], center: true}).translate([(nose_length-tail_length)/2-(printLength/2), (mold_width-wall_width)/2, skateboard.getBounds()[1].z-((center_male_ziptie-ziptie_height*2)/5)/2]));
-				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [outerDiameter, wall_width, (center_male_ziptie-ziptie_height*2)/5], center: true}).translate([(nose_length-tail_length)/2-(printLength/2), (mold_width-wall_width)/2, skateboard.getBounds()[1].z-center_male_ziptie+((center_male_ziptie-ziptie_height*2)/5)/2]));
-				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [outerDiameter, wall_width, ((center_male_ziptie-ziptie_height*2)/5)*3], center: true}).translate([(nose_length-tail_length)/2-(printLength/2), (mold_width-wall_width)/2, skateboard.getBounds()[1].z-((center_male_ziptie-ziptie_height*2)/5+ziptie_height)-(((center_male_ziptie-ziptie_height*2)/5)*3)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [outerDiameter, wall_width, (center_female_ziptie-ziptie_height*2)/5], center: true}).translate([(nose_length-tail_length)/2-(printLength/2), (mold_width-wall_width)/2, skateboard.getBounds()[1].z-((center_female_ziptie-ziptie_height*2)/5)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [outerDiameter, wall_width, (center_female_ziptie-ziptie_height*2)/5], center: true}).translate([(nose_length-tail_length)/2-(printLength/2), (mold_width-wall_width)/2, skateboard.getBounds()[1].z-center_female_ziptie+((center_female_ziptie-ziptie_height*2)/5)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [outerDiameter, wall_width, ((center_female_ziptie-ziptie_height*2)/5)*3], center: true}).translate([(nose_length-tail_length)/2-(printLength/2), (mold_width-wall_width)/2, skateboard.getBounds()[1].z-((center_female_ziptie-ziptie_height*2)/5+ziptie_height)-(((center_female_ziptie-ziptie_height*2)/5)*3)/2]));
 				
-				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, (center_male_ziptie-ziptie_height*2)/5], center: true}).translate([(nose_length-tail_length)/2-(printLength/2)+wall_width/2, mold_width/2, skateboard.getBounds()[1].z-((center_male_ziptie-ziptie_height*2)/5)/2]));
-				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, (center_male_ziptie-ziptie_height*2)/5], center: true}).translate([(nose_length-tail_length)/2-(printLength/2)+wall_width/2, mold_width/2, skateboard.getBounds()[1].z-center_male_ziptie+((center_male_ziptie-ziptie_height*2)/5)/2]));
-				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, ((center_male_ziptie-ziptie_height*2)/5)*3], center: true}).translate([(nose_length-tail_length)/2-(printLength/2)+wall_width/2, mold_width/2, skateboard.getBounds()[1].z-((center_male_ziptie-ziptie_height*2)/5+ziptie_height)-(((center_male_ziptie-ziptie_height*2)/5)*3)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, (center_female_ziptie-ziptie_height*2)/5], center: true}).translate([(nose_length-tail_length)/2-(printLength/2)+wall_width/2, mold_width/2, skateboard.getBounds()[1].z-((center_female_ziptie-ziptie_height*2)/5)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, (center_female_ziptie-ziptie_height*2)/5], center: true}).translate([(nose_length-tail_length)/2-(printLength/2)+wall_width/2, mold_width/2, skateboard.getBounds()[1].z-center_female_ziptie+((center_female_ziptie-ziptie_height*2)/5)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, ((center_female_ziptie-ziptie_height*2)/5)*3], center: true}).translate([(nose_length-tail_length)/2-(printLength/2)+wall_width/2, mold_width/2, skateboard.getBounds()[1].z-((center_female_ziptie-ziptie_height*2)/5+ziptie_height)-(((center_female_ziptie-ziptie_height*2)/5)*3)/2]));
 				
 				// atail
-				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, (center_male_ziptie-ziptie_height*2)/5], center: true}).translate([(nose_length-tail_length)/2-(printLength/2)-wall_width/2, mold_width/2, skateboard.getBounds()[1].z-((center_male_ziptie-ziptie_height*2)/5)/2]));
-				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, (center_male_ziptie-ziptie_height*2)/5], center: true}).translate([(nose_length-tail_length)/2-(printLength/2)-wall_width/2, mold_width/2, skateboard.getBounds()[1].z-center_male_ziptie+((center_male_ziptie-ziptie_height*2)/5)/2]));
-				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, ((center_male_ziptie-ziptie_height*2)/5)*3], center: true}).translate([(nose_length-tail_length)/2-(printLength/2)-wall_width/2, mold_width/2, skateboard.getBounds()[1].z-((center_male_ziptie-ziptie_height*2)/5+ziptie_height)-(((center_male_ziptie-ziptie_height*2)/5)*3)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, (center_female_ziptie-ziptie_height*2)/5], center: true}).translate([(nose_length-tail_length)/2-(printLength/2)-wall_width/2, mold_width/2, skateboard.getBounds()[1].z-((center_female_ziptie-ziptie_height*2)/5)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, (center_female_ziptie-ziptie_height*2)/5], center: true}).translate([(nose_length-tail_length)/2-(printLength/2)-wall_width/2, mold_width/2, skateboard.getBounds()[1].z-center_female_ziptie+((center_female_ziptie-ziptie_height*2)/5)/2]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, ((center_female_ziptie-ziptie_height*2)/5)*3], center: true}).translate([(nose_length-tail_length)/2-(printLength/2)-wall_width/2, mold_width/2, skateboard.getBounds()[1].z-((center_female_ziptie-ziptie_height*2)/5+ziptie_height)-(((center_female_ziptie-ziptie_height*2)/5)*3)/2]));
 				
 				ziptie_array.push(cylinder({r: outerDiameter/2, h: ziptie_height, center: true}).rotateY(90).translate([printLength+(nose_length-tail_length)/2-(printLength/2)-ziptie_height/2-outerDiameter, 0, skateboard.getBounds()[1].z]));
 				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cylinder({r: innerDiameter/2, h: ziptie_height-slice, center: true}).rotateY(90).translate([printLength+(nose_length-tail_length)/2-(printLength/2)-ziptie_height/2-outerDiameter, 0, skateboard.getBounds()[1].z]));
 				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [ziptie_height, wall_width, innerDiameter/2], center: true}).translate([printLength+(nose_length-tail_length)/2-(printLength/2)-ziptie_height/2-outerDiameter, wall_width/2, skateboard.getBounds()[1].z-innerDiameter/4]));
-				
+								
 				ziptie_array.push(cylinder({r: outerDiameter/2, h: ziptie_height, center: true}).rotateY(90).translate([(nose_length-tail_length)/2-(printLength/2)+ziptie_height/2+outerDiameter, 0, skateboard.getBounds()[1].z]));
 				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cylinder({r: innerDiameter/2, h: ziptie_height-slice, center: true}).rotateY(90).translate([(nose_length-tail_length)/2-(printLength/2)+ziptie_height/2+outerDiameter, 0, skateboard.getBounds()[1].z]));
 				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [ziptie_height, wall_width, innerDiameter/2], center: true}).translate([(nose_length-tail_length)/2-(printLength/2)+ziptie_height/2+outerDiameter, wall_width/2, skateboard.getBounds()[1].z-innerDiameter/4]));
@@ -1098,17 +1268,17 @@ function main (parameters)
 				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cylinder({r: innerDiameter/2, h: ziptie_height-slice, center: true}).rotateY(90).translate([(nose_length-tail_length)/2-(printLength/2)-ziptie_height/2-outerDiameter, 0, skateboard.getBounds()[1].z]));
 				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [ziptie_height, wall_width, innerDiameter/2], center: true}).translate([(nose_length-tail_length)/2-(printLength/2)-ziptie_height/2-outerDiameter, wall_width/2, skateboard.getBounds()[1].z-innerDiameter/4]));
 				
-				ziptie_array.push(cylinder({r: outerDiameter/2, h: ziptie_height, center: true}).rotateX(90).translate([printLength+(nose_length-tail_length)/2-(printLength/2), ziptie_height/2+outerDiameter, skateboard.getBounds()[1].z]));
-				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cylinder({r: innerDiameter/2, h: ziptie_height-slice, center: true}).rotateX(90).translate([printLength+(nose_length-tail_length)/2-(printLength/2), ziptie_height/2+outerDiameter, skateboard.getBounds()[1].z]));
-				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width*2, ziptie_height, innerDiameter/2], center: true}).translate([printLength+(nose_length-tail_length)/2-(printLength/2)-wall_width/4, ziptie_height/2+outerDiameter, skateboard.getBounds()[1].z-innerDiameter/4]));
+				ziptie_array.push(cylinder({r: outerDiameter/2, h: ziptie_height, center: true}).rotateX(90).translate([printLength+(nose_length-tail_length)/2-(printLength/2)+ziptie_width, ziptie_height/2+outerDiameter, skateboard.getBounds()[1].z]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cylinder({r: innerDiameter/2, h: ziptie_height-slice, center: true}).rotateX(90).translate([printLength+(nose_length-tail_length)/2-(printLength/2)+ziptie_width, ziptie_height/2+outerDiameter, skateboard.getBounds()[1].z]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width*2, ziptie_height, innerDiameter/2], center: true}).translate([printLength+(nose_length-tail_length)/2-(printLength/2), ziptie_height/2+outerDiameter, skateboard.getBounds()[1].z-innerDiameter/4]));
 				
-				ziptie_array.push(cylinder({r: outerDiameter/2, h: ziptie_height, center: true}).rotateX(90).translate([(nose_length-tail_length)/2-(printLength/2), ziptie_height/2+outerDiameter, skateboard.getBounds()[1].z]));
-				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cylinder({r: innerDiameter/2, h: ziptie_height-slice, center: true}).rotateX(90).translate([(nose_length-tail_length)/2-(printLength/2), ziptie_height/2+outerDiameter, skateboard.getBounds()[1].z]));
-				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width*2, ziptie_height, innerDiameter/2], center: true}).translate([(nose_length-tail_length)/2-(printLength/2)-wall_width/4, ziptie_height/2+outerDiameter, skateboard.getBounds()[1].z-innerDiameter/4]));
+				ziptie_array.push(cylinder({r: outerDiameter/2, h: ziptie_height, center: true}).rotateX(90).translate([(nose_length-tail_length)/2-(printLength/2)-ziptie_width, ziptie_height/2+outerDiameter, skateboard.getBounds()[1].z]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cylinder({r: innerDiameter/2, h: ziptie_height-slice, center: true}).rotateX(90).translate([(nose_length-tail_length)/2-(printLength/2)-ziptie_width, ziptie_height/2+outerDiameter, skateboard.getBounds()[1].z]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width*2, ziptie_height, innerDiameter/2], center: true}).translate([(nose_length-tail_length)/2-(printLength/2), ziptie_height/2+outerDiameter, skateboard.getBounds()[1].z-innerDiameter/4]));
 
 
 				// atail to tail
-				ziptie_array.push(cylinder({r: outerDiameter/2, h: atail_tail_female_ziptie, center: true}).translate([(nose_length-tail_length)/2-(printLength+(printLength/2)), mold_width/2, (atail_tail_female_ziptie/2+skateboard.getBounds()[1].z-atail_tail_female_ziptie)]));
+				ziptie_array.push(cylinder({r: outerDiameter/2, h: atail_tail_female_ziptie, center: true}).translate([(nose_length-tail_length)/2-(printLength+(printLength/2)), mold_width/2, atail_tail_female_ziptie/2+skateboard.getBounds()[1].z-atail_tail_female_ziptie]));
 				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cylinder({r: innerDiameter/2, h: atail_tail_female_ziptie, center: true}).translate([(nose_length-tail_length)/2-(printLength+(printLength/2)), mold_width/2, atail_tail_female_ziptie/2+skateboard.getBounds()[1].z-atail_tail_female_ziptie]));
 				
 				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [outerDiameter, wall_width, (atail_tail_female_ziptie-ziptie_height*2)/5], center: true}).translate([(nose_length-tail_length)/2-(printLength+(printLength/2)), (mold_width-wall_width)/2, skateboard.getBounds()[1].z-((atail_tail_female_ziptie-ziptie_height*2)/5)/2]));
@@ -1134,10 +1304,10 @@ function main (parameters)
 				
 				ziptie_array.push(cylinder({r: outerDiameter/2, h: ziptie_height, center: true}).rotateX(90).translate([(nose_length-tail_length)/2-(printLength+(printLength/2)), ziptie_height/2+outerDiameter, skateboard.getBounds()[1].z]));
 				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cylinder({r: innerDiameter/2, h: ziptie_height-slice, center: true}).rotateX(90).translate([(nose_length-tail_length)/2-(printLength+(printLength/2)), ziptie_height/2+outerDiameter, skateboard.getBounds()[1].z]));
-				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width*2, ziptie_height, innerDiameter/2], center: true}).translate([(nose_length-tail_length)/2-(printLength+(printLength/2))-wall_width/4, ziptie_height/2+outerDiameter, skateboard.getBounds()[1].z-innerDiameter/4]));
+				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width*2, ziptie_height, innerDiameter/2], center: true}).translate([(nose_length-tail_length)/2-(printLength+(printLength/2)), ziptie_height/2+outerDiameter, skateboard.getBounds()[1].z-innerDiameter/4]));
 								
 				// tail to tail
-				ziptie_array.push(cylinder({r: outerDiameter/2, h: tail_tail_female_ziptie, center: true}).translate([(nose_length-tail_length)/2-(mold_length/2), 0, (tail_tail_female_ziptie/2+skateboard.getBounds()[1].z-tail_tail_female_ziptie)]));
+				ziptie_array.push(cylinder({r: outerDiameter/2, h: tail_tail_female_ziptie, center: true}).translate([(nose_length-tail_length)/2-(mold_length/2), 0, tail_tail_female_ziptie/2+skateboard.getBounds()[1].z-tail_tail_female_ziptie]));
 				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cylinder({r: innerDiameter/2, h: tail_tail_female_ziptie, center: true}).translate([(nose_length-tail_length)/2-(mold_length/2), 0, tail_tail_female_ziptie/2+skateboard.getBounds()[1].z-tail_tail_female_ziptie]));
 				
 				ziptie_array[ziptie_array.length - 1] = ziptie_array[ziptie_array.length - 1].subtract(cube({size: [wall_width, outerDiameter, (tail_tail_female_ziptie-ziptie_height*2)/5], center: true}).translate([(nose_length-tail_length)/2-(mold_length/2)+wall_width/2, 0, skateboard.getBounds()[1].z-((tail_tail_female_ziptie-ziptie_height*2)/5)/2]));
