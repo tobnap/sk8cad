@@ -931,7 +931,7 @@ function main(parameters) {
 			}
 		}
 
-		if (make_mold_zipties == true) {
+		if (make_mold_zipties == true && !boardDisplay) {
 			skateboard = doZipties(skateboard, display, router_template, nose_length, tail_length, mold_length, mold_width, mold_height, mold_offset, printLength, printSection, nose_nose_male_ziptie, anose_nose_male_ziptie, center_male_ziptie, atail_tail_male_ziptie, tail_tail_male_ziptie, nose_nose_female_ziptie, anose_nose_female_ziptie, center_female_ziptie, atail_tail_female_ziptie, tail_tail_female_ziptie);
 		}
 
@@ -982,12 +982,14 @@ function main(parameters) {
 				profile = profile.subtract(holes);
 				profile = color([0, 0.99, 0.99], profile);
 
-				if (slice_equally) {
-					profile = doZipties(profile, display, router_template, nose_length, tail_length, mold_length, 4.125*4, mold_height, mold_offset, (profile.getBounds()[1].x - profile.getBounds()[0].x)/5, printSection, nose_nose_male_ziptie, anose_nose_male_ziptie, center_male_ziptie, atail_tail_male_ziptie, tail_tail_male_ziptie, nose_nose_female_ziptie, anose_nose_female_ziptie, center_female_ziptie, atail_tail_female_ziptie, tail_tail_female_ziptie);
-					profile = doPrintSections(profile, display, mold_length, mold_height, mold_offset, min_cavity_height, printSection, (profile.getBounds()[1].x - profile.getBounds()[0].x)/5, 4.125 + 0.5, nose_length, tail_length, (4.125 + 0.5)/2);
-				} else {
-					profile = doZipties(profile, display, router_template, nose_length, tail_length, mold_length, 4.125*4, mold_height, mold_offset, printLength, printSection, nose_nose_male_ziptie, anose_nose_male_ziptie, center_male_ziptie, atail_tail_male_ziptie, tail_tail_male_ziptie, nose_nose_female_ziptie, anose_nose_female_ziptie, center_female_ziptie, atail_tail_female_ziptie, tail_tail_female_ziptie);
-					profile = doPrintSections(profile, display, mold_length, mold_height, mold_offset, min_cavity_height, printSection, printLength, 4.125 + 0.5, nose_length, tail_length, (4.125 + 0.5)/2);
+				if (router_template) {
+					if (slice_equally) {
+						profile = doZipties(profile, display, router_template, nose_length, tail_length, mold_length, 4.125*4, mold_height, mold_offset, (profile.getBounds()[1].x - profile.getBounds()[0].x)/5, printSection, nose_nose_male_ziptie, anose_nose_male_ziptie, center_male_ziptie, atail_tail_male_ziptie, tail_tail_male_ziptie, nose_nose_female_ziptie, anose_nose_female_ziptie, center_female_ziptie, atail_tail_female_ziptie, tail_tail_female_ziptie);
+						profile = doPrintSections(profile, display, mold_length, mold_height, mold_offset, min_cavity_height, printSection, (profile.getBounds()[1].x - profile.getBounds()[0].x)/5, 4.125 + 0.5, nose_length, tail_length, (4.125 + 0.5)/2);
+					} else {
+						profile = doZipties(profile, display, router_template, nose_length, tail_length, mold_length, 4.125*4, mold_height, mold_offset, printLength, printSection, nose_nose_male_ziptie, anose_nose_male_ziptie, center_male_ziptie, atail_tail_male_ziptie, tail_tail_male_ziptie, nose_nose_female_ziptie, anose_nose_female_ziptie, center_female_ziptie, atail_tail_female_ziptie, tail_tail_female_ziptie);
+						profile = doPrintSections(profile, display, mold_length, mold_height, mold_offset, min_cavity_height, printSection, printLength, 4.125 + 0.5, nose_length, tail_length, (4.125 + 0.5)/2);
+					}
 				}
 
 				modelArray = [profile];
